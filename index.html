@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI副業チャンネル 動画制作の仕組み</title>
+<meta name="description" content="ニュースを集めて、台本を書き、声と画面をつけて、動画を書き出すまでをClaude Codeで半自動にした仕組みの説明ページ。">
+<style>
+:root{--bg:#fafaf7;--ink:#1d1f24;--sub:#5a5f6b;--line:#dcdcd4;--accent:#1f4fd8;--hl:#ffe45c;--mk:#ffe45c;--card:#fff}
+@media (prefers-color-scheme:dark){:root{--bg:#15171c;--ink:#ecece6;--sub:#a3a8b3;--line:#32353d;--accent:#8fb0ff;--mk:#6b5d00;--card:#1c1f26}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.85 "Hiragino Sans","Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif}
+main{max-width:860px;margin:0 auto;padding:48px 20px 96px}
+h1{font-size:clamp(28px,5vw,40px);line-height:1.35;margin:0 0 16px}
+h2{font-size:24px;margin:72px 0 12px;padding-top:24px;border-top:2px solid var(--ink)}
+h3{font-size:18px;margin:28px 0 6px}
+p{margin:0 0 14px}
+.lead{font-size:19px}
+.sub{color:var(--sub);font-size:15px}
+mark{background:linear-gradient(transparent 55%,var(--mk) 55%);color:inherit}
+nav ol{margin:24px 0 0;padding:0 0 0 1.4em;columns:2;column-gap:32px;font-size:15px}
+nav a{color:var(--accent)}
+table{width:100%;border-collapse:collapse;margin:12px 0 20px;font-size:15.5px;background:var(--card)}
+th,td{border:1px solid var(--line);padding:9px 12px;text-align:left;vertical-align:top;line-height:1.65}
+th{background:var(--bg);white-space:nowrap}
+td.num{white-space:nowrap;text-align:center;width:2.4em}
+code{font:14px/1.5 ui-monospace,Menlo,monospace;background:var(--card);border:1px solid var(--line);padding:1px 6px;border-radius:4px}
+.who{display:inline-block;font-size:13px;padding:1px 8px;border:1px solid var(--ink);border-radius:99px;white-space:nowrap}
+.who.h{background:var(--hl);color:#1d1f24;border-color:#1d1f24}
+.box{border-left:5px solid var(--accent);background:var(--card);padding:14px 18px;margin:18px 0}
+.box.ng{border-color:#c0392b}
+.box p:last-child{margin:0}
+svg{width:100%;height:auto;display:block;margin:16px 0}
+svg text{fill:var(--ink);font-family:inherit}
+.fl{fill:var(--card);stroke:var(--ink);stroke-width:1.5}
+.fh{fill:var(--hl);stroke:var(--ink);stroke-width:1.5}
+.fh+text,.fh~text.dk{fill:#1d1f24}
+.ar{stroke:var(--ink);stroke-width:1.5;fill:none}
+ul{padding-left:1.3em;margin:0 0 14px}
+li{margin-bottom:4px}
+footer{margin-top:72px;padding-top:20px;border-top:1px solid var(--line);color:var(--sub);font-size:14px}
+@media (max-width:640px){nav ol{columns:1}table{font-size:14px}th,td{padding:7px 8px}}
+</style>
+</head>
+<body>
+<main>
+
+<p class="sub">ドキュメント / 2026年10月</p>
+<h1>ニュースから動画まで、<br>Claude Codeで半自動にした仕組み</h1>
+<p class="lead">AI副業をテーマにしたYouTubeチャンネルの動画を、<mark>人は3回だけ判断すれば出来上がる</mark>ようにしたプロジェクトの説明です。何を作り、誰が何をして、何を決めたのかを、順に書きます。</p>
+
+<nav>
+<ol>
+<li><a href="#what">何を作っているか</a></li>
+<li><a href="#flow">1本ができるまで</a></li>
+<li><a href="#human">人がやること</a></li>
+<li><a href="#rules">決めたこと</a></li>
+<li><a href="#images">画像は本物だけ</a></li>
+<li><a href="#screens">画面の作り方</a></li>
+<li><a href="#slop">AIっぽさを消す工夫</a></li>
+<li><a href="#cmd">コマンド一覧</a></li>
+<li><a href="#result">試しに作った結果</a></li>
+<li><a href="#todo">これからやること</a></li>
+<li><a href="#parts">使っている部品</a></li>
+</ol>
+</nav>
+
+<h2 id="what">何を作っているか</h2>
+<p>会社が運営するYouTubeチャンネルです。視聴者は、副収入を得たい会社員を想定しています。動画で最新のAIニュースを解説し、見た人をLINE登録、説明会、個別相談へ案内します。</p>
+<svg viewBox="0 0 820 90" role="img" aria-label="動画からLINE登録、説明会、個別相談へ進む流れ">
+<g font-size="25" text-anchor="middle">
+<rect class="fh" x="4" y="20" width="170" height="50" rx="4"/><text class="dk" x="89" y="52">YouTube動画</text>
+<rect class="fl" x="226" y="20" width="170" height="50" rx="4"/><text x="311" y="52">LINE登録</text>
+<rect class="fl" x="448" y="20" width="170" height="50" rx="4"/><text x="533" y="52">説明会</text>
+<rect class="fl" x="670" y="20" width="146" height="50" rx="4"/><text x="743" y="52">個別相談</text>
+</g>
+<g class="ar"><path d="M176 45h48M398 45h48M620 45h48"/><path d="M216 38l8 7-8 7M438 38l8 7-8 7M660 38l8 7-8 7"/></g>
+</svg>
+<p>このプロジェクトが受け持つのは、いちばん左の「動画」を安定して作り続ける部分です。LINE登録後に渡す特典の中身は、まだ決めていません。決まるまでは、動画にLINEの案内を入れません。</p>
+
+<h2 id="flow">1本ができるまで</h2>
+<p>ニュース探しから書き出しまでを、<code>/research</code> のようなスラッシュコマンドで順に進めます。投稿だけは人がYouTube Studioから手で行います。</p>
+<svg viewBox="0 0 820 250" role="img" aria-label="制作の流れ。ネタ探し、素材集め、台本、声、画面、書き出し、確認">
+<g font-size="21" text-anchor="middle">
+<rect class="fl" x="4" y="10" width="124" height="56" rx="4"/><text x="66" y="44">ネタ探し</text>
+<rect class="fl" x="146" y="10" width="124" height="56" rx="4"/><text x="208" y="44">素材集め</text>
+<rect class="fl" x="288" y="10" width="124" height="56" rx="4"/><text x="350" y="44">台本</text>
+<rect class="fl" x="430" y="10" width="124" height="56" rx="4"/><text x="492" y="44">声</text>
+<rect class="fl" x="572" y="10" width="124" height="56" rx="4"/><text x="634" y="44">画面</text>
+<rect class="fl" x="714" y="10" width="102" height="56" rx="4"/><text x="765" y="44">書き出し</text>
+</g>
+<g class="ar"><path d="M130 38h14M272 38h14M414 38h14M556 38h14M698 38h14"/></g>
+<g font-size="17" text-anchor="middle" class="sub">
+<text x="66" y="94">/research</text><text x="208" y="92">/assets</text><text x="350" y="92">/script</text><text x="492" y="92">/voice</text><text x="634" y="92">/video</text><text x="765" y="92">/make</text>
+</g>
+<g font-size="18" text-anchor="middle">
+<rect class="fh" x="4" y="120" width="124" height="44" rx="22"/><text class="dk" x="66" y="148">①ネタを選ぶ</text>
+<rect class="fh" x="288" y="120" width="124" height="44" rx="22"/><text class="dk" x="350" y="148">②台本を直す</text>
+<rect class="fh" x="572" y="120" width="242" height="44" rx="22"/><text class="dk" x="693" y="148">③倍速で見て確認する</text>
+</g>
+<g class="ar" stroke-dasharray="4 4"><path d="M66 68v50M350 68v50M693 68v50"/></g>
+<text x="4" y="214" font-size="17">そのあと、サムネイル3案と概要欄の文もつくる。公開は人が手で行う。</text>
+</svg>
+
+<table>
+<tr><th class="num">順</th><th>コマンド</th><th>やること</th></tr>
+<tr><td class="num">1</td><td><code>/research</code></td><td>出版社のRSSでニュースを集める。X上の反応を調べる質問文も作る。ネタの候補を3〜5本に絞る</td></tr>
+<tr><td class="num">2</td><td><code>/brief</code></td><td>選んだネタで動画のフォルダを作り、企画を書く</td></tr>
+<tr><td class="num">3</td><td><code>/assets</code></td><td>記事、公式発表、公式のX投稿から、本物の画像を60点以上集める</td></tr>
+<tr><td class="num">4</td><td><code>/script</code></td><td>台本を書く。AIっぽい言い回しの候補も自動で拾って直す</td></tr>
+<tr><td class="num">5</td><td><code>/voice</code></td><td>台本を読み上げた音声を作る。読み間違いも確かめる</td></tr>
+<tr><td class="num">6</td><td><code>/video</code></td><td>画面を組み立て、書き出す前に各シーンの1コマで確認し、動画にする</td></tr>
+<tr><td class="num">7</td><td><code>/thumb</code></td><td>本物の図を使ったサムネ3案</td></tr>
+<tr><td class="num">8</td><td><code>/qa</code></td><td>音量、字幕、解像度などを機械で確認。タイトル案、概要欄、目次、出典もまとめる</td></tr>
+</table>
+
+<h2 id="human">人がやること</h2>
+<p>人が判断するのは、次の3か所だけです。コマンドは、ここで必ず止まって答えを待ちます。人の代わりに選んだり、直した台本を勝手に書き換えたりしません。</p>
+<table>
+<tr><th>判断</th><th>内容</th><th>目安の時間</th></tr>
+<tr><td><span class="who h">①</span> ネタを選ぶ</td><td>候補3〜5本から1本を選ぶ。XのGrokに質問文を貼り、答えを保存する作業も含む</td><td>10分</td></tr>
+<tr><td><span class="who h">②</span> 台本を直す</td><td>読んで、直したい所を伝える。数字や固有名詞の確認もここ</td><td>15分</td></tr>
+<tr><td><span class="who h">③</span> 倍速で見て確認する</td><td>書き出した動画を通して見る。問題がなければ公開へ</td><td>10分</td></tr>
+</table>
+<p>公開作業（YouTube Studioへのアップロード、サムネ3案の「テストと比較」設定）は、5分ほどです。1本あたり、人の作業はおよそ40〜50分を見込んでいます。</p>
+
+<h2 id="rules">決めたこと</h2>
+<table>
+<tr><th>項目</th><th>決定</th></tr>
+<tr><td>視聴者</td><td>副収入を狙う会社員</td></tr>
+<tr><td>Xの検索</td><td>追加でお金をかけない。すでに契約しているX PremiumのGrokに、人が質問文を貼る。APIやBotは使わない</td></tr>
+<tr><td>声</td><td>AivisSpeech（自分のパソコンで動く、無料の音声合成）。公式モデルの「まお」「コハク」は商用利用でき、クレジット表記も要らない</td></tr>
+<tr><td>映像</td><td>HyperFramesだけ。HTMLとSVGで画面を組み、動画に書き出す。Claude Codeの個人プランで動く</td></tr>
+<tr><td>キャラクター</td><td>用意したアニメ風の1枚絵を、最初に1回だけ取り込む。呼吸、揺れ、声に合わせた弾みで動かす。表情の差分は作らない</td></tr>
+<tr><td>字幕</td><td>すべての語りに付ける。1行25字まで、2行まで。句読点や文節で区切る</td></tr>
+<tr><td>AIの利用</td><td>概要欄の最後に書く。動画の中では、見ていて機械っぽさが気にならない作りにする</td></tr>
+<tr><td>投稿</td><td>自動投稿はしない。人がYouTube Studioから手で行う</td></tr>
+</table>
+
+<h2 id="images">画像は本物だけ</h2>
+<p>動画に出す画像は、そのニュースの本物の画像だけにしました。きっかけは、仮にストック写真やサンプル画像を入れてみたところ、一目で「よくあるAI動画」に見えたことです。</p>
+<div class="box"><p><strong>使う</strong>　一次情報の図（会社の発表やレポートのグラフ）、公式ページのスクリーンショット、公式のX投稿、記事の見出し部分のスクリーンショット</p></div>
+<div class="box ng"><p><strong>使わない</strong>　ストック写真、フリー素材、サンプル画像、AI生成画像、記事のアイキャッチ用ストック写真、広告、YouTubeからダウンロードした動画</p></div>
+<h3>集め方</h3>
+<ul>
+<li>画像は <code>news.mjs</code> という道具が集める。1本あたり60点以上を目標にして、集めた画像には番号（n73、x1 など）が付く</li>
+<li>台本では番号を書くだけで画像を呼び出せる</li>
+<li>Xの投稿は、公式の埋め込み機能（oEmbed）で撮る。x.com をブラウザで自動操作して読み取ることはしない</li>
+<li>ニュース探しは出版社のRSSで行う。Googleニュース、BingニュースのRSSは使わない</li>
+<li>画像の出どころは、画面の右上と概要欄の出典に自動で出す</li>
+</ul>
+
+<h2 id="screens">画面の作り方</h2>
+<p>画面はHTMLとSVGで描きます。画面の種類は17個あり、台本に <code>[シーン: 画像 | 画像=n73 | 丸=41.7,58.1,3]</code> のように書くと、そのとおりの画面になります。</p>
+<table>
+<tr><th>分類</th><th>種類</th></tr>
+<tr><td>画像を見せる</td><td>タイトル、ニュース、画像、背景画像、画像グリッド、動画、X投稿</td></tr>
+<tr><td>数字やデータ</td><td>数字、グラフ、比較、ランキング</td></tr>
+<tr><td>文字で整理する</td><td>箇条書き、流れ、手順、引用、まとめ</td></tr>
+<tr><td>語りかける</td><td>話者（キャラが大きく語る1文）</td></tr>
+</table>
+<h3>画像に重ねる印</h3>
+<ul>
+<li><strong>丸</strong>：見てほしい場所を囲む</li>
+<li><strong>矢印</strong>：1点を指す</li>
+<li><strong>線</strong>：文章に蛍光ペンのように引く</li>
+<li><strong>寄る</strong>：その場所へゆっくり近づく</li>
+</ul>
+<p>英語のグラフは、そのまま出さずに日本語で描き直すこともできます。その場合は出典を必ず付けます。画面のルールとして、画像を使う画面を全体の4割以上にして、文字だけの画面は3つ続けません。</p>
+
+<h2 id="slop">AIっぽさを消す工夫</h2>
+<p>視聴者が「AIが作った」と感じて離れないよう、台本、画面、素材、サムネ、見直しの5つで決まりを持たせました。Claude Codeはこの決まりを読んでから作業します。</p>
+<table>
+<tr><th>決まり</th><th>見ること</th></tr>
+<tr><td>台本</td><td>「そして」「つまり」で文を始めすぎない。「〜ではなく」を重ねない。「3つのポイント」を多用しない。同じ文末を5回続けない。70字を超える文を作らない</td></tr>
+<tr><td>画面</td><td>同じ種類の画面を続けない。文字だけの画面を3つ続けない。グラデーション、光る効果、絵文字、飾りのアイコンを使わない</td></tr>
+<tr><td>素材</td><td>本物の画像だけを使う。1章に1枚は本物の画像を出す</td></tr>
+<tr><td>サムネ</td><td>画像生成は使わず、ニュースの本物の図を大きく置く。言うことは1つだけにする</td></tr>
+<tr><td>見直し</td><td><code>/review</code> が上のルールを機械で調べ、直す候補を出す。日本語の推敲スキルによる文章の検査も行う</td></tr>
+</table>
+<p>AIを使っていることは隠しません。概要欄の最後に、開示の文を入れます。</p>
+
+<h2 id="cmd">コマンド一覧</h2>
+<table>
+<tr><th>コマンド</th><th>用途</th></tr>
+<tr><td><code>/doctor</code></td><td>環境がそろっているか確かめる</td></tr>
+<tr><td><code>/character</code></td><td>キャラ画像を取り込む（背景を自動で消す）</td></tr>
+<tr><td><code>/research</code> <code>/brief</code> <code>/assets</code></td><td>ネタ探し、企画、素材集め</td></tr>
+<tr><td><code>/script</code> <code>/voice</code> <code>/video</code></td><td>台本、声、画面と書き出し</td></tr>
+<tr><td><code>/thumb</code> <code>/qa</code> <code>/review</code></td><td>サムネ、最終確認、見直し</td></tr>
+<tr><td><code>/make</code></td><td>台本が決まったあと、声から確認までをまとめて回す</td></tr>
+<tr><td><code>/competitors</code></td><td>競合チャンネルの一覧から、飛び抜けて伸びた動画を抜き出す</td></tr>
+</table>
+
+<h2 id="result">試しに作った結果</h2>
+<p>Anthropicが公開した雇用についてのレポートを題材に、見本の動画を1本作りました。素材はすべて、レポートの図、記事の見出し、公式のX投稿から集めた本物の画像です。</p>
+<table>
+<tr><th>項目</th><th>結果</th></tr>
+<tr><td>長さ</td><td>6分31秒（8章、25シーン、73文）</td></tr>
+<tr><td>音量</td><td>-14.2 LUFS、ピーク -1.3 dBFS</td></tr>
+<tr><td>画質</td><td>1920×1080、30fps</td></tr>
+<tr><td>集めた素材</td><td>187点（出どころ9か所）</td></tr>
+<tr><td>書き出しにかかった時間</td><td>約5分</td></tr>
+<tr><td>書き出す前の確認</td><td>全シーンの1コマ一覧が約30秒で作れる</td></tr>
+</table>
+<p>自動の確認は、キャラクターを除いてすべて合格しました。キャラクターは、本番の絵を取り込む前の仮のものです。</p>
+<p class="sub">見本の動画と素材は、他社の記事や図を含むため、このページでは公開していません。</p>
+
+<h2 id="todo">これからやること</h2>
+<ol>
+<li>キャラクターの画像を取り込む</li>
+<li>「まお」「コハク」などの声を聴き比べて、使う声を決める</li>
+<li><code>/research</code> で1本目のネタを探して、本番の動画を作る</li>
+<li>LINE登録のあとに渡す特典を決めて、動画の案内文を書く</li>
+</ol>
+<p>注意点として、公式ページの動画がYouTubeの埋め込みの場合は、利用規約のため使えません。</p>
+
+<h2 id="parts">使っている部品</h2>
+<table>
+<tr><th>部品</th><th>役割</th></tr>
+<tr><td>Claude Code</td><td>全体を動かす。スラッシュコマンドとスキルで作業を進める</td></tr>
+<tr><td>HyperFrames</td><td>HTMLで書いた画面を動画に書き出す</td></tr>
+<tr><td>AivisSpeech</td><td>日本語の音声合成。パソコン上で動く</td></tr>
+<tr><td>GSAP</td><td>画面のアニメーション</td></tr>
+<tr><td>puppeteer</td><td>記事や公式ページのスクリーンショットを撮る</td></tr>
+<tr><td>ffmpeg</td><td>動画をつなぎ、音量をそろえる</td></tr>
+<tr><td>Node.js</td><td>各種の道具（<code>tools/</code>）を動かす</td></tr>
+</table>
+
+<footer>
+このページは仕組みの説明です。制作用のファイル一式（台本、素材、動画）は公開していません。
+</footer>
+</main>
+</body>
+</html>
